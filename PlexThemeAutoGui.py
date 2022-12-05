@@ -4,7 +4,6 @@ import re
 import shutil
 import tempfile
 import textwrap
-import threading
 import webbrowser
 from json import dump as jsondump
 from json import load as jsonload
