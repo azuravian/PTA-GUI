@@ -8,7 +8,7 @@ import threading
 import webbrowser
 from json import dump as jsondump
 from json import load as jsonload
-from json import loads as loads
+from json import loads
 from os.path import exists
 from urllib.request import Request, urlopen
 
@@ -23,20 +23,22 @@ from pytube import YouTube
 from strsimpy import SIFT4
 from youtubesearchpython import VideosSearch
 
+print(os.getcwd())
+
 FOLDER = 'application/vnd.google-apps.folder'
-gdmovies = []
-GDRIVEID = ""
+#GDRIVEID = ""
 plexmovies = []
 filterlist = []
+gdmovies = []
 filterstate = False
-APIKEY = ""
-PLEX_URL = ""
-PLEX_TOKEN = ""
-LIBRARY = ""
+#APIKEY = ""
+#PLEX_URL = ""
+#PLEX_TOKEN = ""
+#LIBRARY = ""
 WORKING_DIR =os.path.dirname(__file__)
 SETTINGS_FILE = os.path.join(WORKING_DIR, 'settings_file.cfg')
 NO_POSTER = os.path.join(WORKING_DIR, 'noposter.png')
-DEFAULT_SETTINGS = {'plex_url': 'http://', 'plex_token': None , 'gdriveid': '128O8hwhxmPppwJ3ssGKQoepMrKLB5tNA', 'apikey': 'AIzaSyA60Ypw9Xv2hXusCBUEfTDrbgrB8J4ZA5g', 'library': 'Movies', 'theme': sg.theme('DarkGrey11')}
+DEFAULT_SETTINGS = {'plex_url': 'http://127.0.0.1:32400', 'plex_token': None , 'gdriveid': '128O8hwhxmPppwJ3ssGKQoepMrKLB5tNA', 'apikey': 'AIzaSyA60Ypw9Xv2hXusCBUEfTDrbgrB8J4ZA5g', 'library': 'Movies', 'theme': sg.theme('DarkGrey11')}
 # "Map" from the settings dictionary keys to the window's element keys
 SETTINGS_KEYS_TO_ELEMENT_KEYS = {'plex_url': '-PLEX URL-', 'plex_token': '-PLEX TOKEN-', 'gdriveid': '-GDRIVE ID-', 'apikey': '-APIKEY-', 'library': '-MOVIE LIBRARY-', 'theme': '-THEME-'}
 on_image = b'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TXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNC40LjAtRXhpdjIiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iCiAgICB4bWxuczpzdEV2dD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlRXZlbnQjIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6R0lNUD0iaHR0cDovL3d3dy5naW1wLm9yZy94bXAvIgogICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iCiAgIHhtcE1NOkRvY3VtZW50SUQ9ImdpbXA6ZG9jaWQ6Z2ltcDoxZGFjMDBkYy0zZmZjLTRiMTgtYTJjOC0yMjk2ZjVhOTY4YjYiCiAgIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ZDBhZjZkZGYtMGU0Zi00OWYwLTg2ZjAtZmE3YzQwZWRmM2QzIgogICB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6ZjBmNGY1MWYtOTBkMS00YThlLWJhMzYtNTc3YjcxN2NhYTFiIgogICBkYzpGb3JtYXQ9ImltYWdlL3BuZyIKICAgR0lNUDpBUEk9IjIuMCIKICAgR0lNUDpQbGF0Zm9ybT0iV2luZG93cyIKICAgR0lNUDpUaW1lU3RhbXA9IjE2NzAxMjk4NjAzNzExMjkiCiAgIEdJTVA6VmVyc2lvbj0iMi4xMC4zMiIKICAgdGlmZjpPcmllbnRhdGlvbj0iMSIKICAgeG1wOkNyZWF0b3JUb29sPSJHSU1QIDIuMTAiCiAgIHhtcDpNZXRhZGF0YURhdGU9IjIwMjI6MTI6MDNUMjM6NTc6NDAtMDU6MDAiCiAgIHhtcDpNb2RpZnlEYXRlPSIyMDIyOjEyOjAzVDIzOjU3OjQwLTA1OjAwIj4KICAgPHhtcE1NOkhpc3Rvcnk+CiAgICA8cmRmOlNlcT4KICAgICA8cmRmOmxpCiAgICAgIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiCiAgICAgIHN0RXZ0OmNoYW5nZWQ9Ii8iCiAgICAgIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MWFhODZjNWYtZmRkYy00ODY4LWFlZjktMmM3ZjZkMDJhODkwIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJHaW1wIDIuMTAgKFdpbmRvd3MpIgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTAzVDIzOjU3OjQwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/Pl06t6cAAAAGYktHRAAAAAAAAPlDu38AAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAHdElNRQfmDAQEOSh6Y6X1AAAEQElEQVRYw82XW28bRRiGn5kd2yElOGroJjixUCVOKe0FrSpCiBBJKeLQqlLhDkXcIH5Di4TEHRdcpco/KIJcEIFyEyQIcEMhHCJaqhRBTE1xjs1BSX1IvLszXOzasZs2iR2c5JXGa43Wu9/j751vvhH4qu/v7++Zm5/tzmazDZTJlHxWJ8d1uDFx3T157DnZdLCpPhwOr1JDeZ7nWpZ1bWJi4su+vr4kgGpsbGy8dKnvk9Hfrrx0859kaC2/CggQ5aA7ga0LRzh/5k1OvXiaWCyGEIJaa3l5mbGxsclUKnV+cHDwJ3Xh4oV3vv3x61cHvrlMnQruEmCkfy2OKpVdg/feep+zr52jtbUV13VxHKemkJFIhPr6erq6ulrz+fzHyWSyU+XdtXd//v2HIqSRgBVcJRhrHb7suh0ZOCDg2eOdNDc3A2BZVs0zWnh+NBolHo/He3t7n1T2IfvwUnbWv6MAqcCEAkgFptqsGmiNxFFKoZQqBmFZFrulaDRa19bW1qiUUgpM0a7GCiAjJbAygK0ClCx7LmMMaj3fwdosyagOBxm1qrAtgAZy7AupcnODKGS1YNtQsF4LoJWUXsm+URHUiJIhS4YIAq7Gunofgm4sXSV2bgH9GJgHQNwB+SeIJdCHwRwC6yqwCvoo4IH8g30nuVUxMQfBOe1bWN4E3QRuD1AH5hHwngbvSJDAw2DiO2yj9gQU8J4BsQrqe5AJCH3lV2Tdtm5P7ykw0f0JuLV1CzoAuEA+sLIGkQ7AAJH17ey+cFfnuEfbyL0ah+2BZoCHgTDgBHvqgyBW/PWJAesKuGeC6ry6/UAqDbzSeSnl9kGtq+C8Dm4nyH99m4p88N0O/rlFkNfAO7l50FrrbQdeCeR2/sAtQcVtf116j/uVVy6BHPUzJ2ZArvlZtv7ybS7u3HsrMsbged7egwoT1BLjD2Gg8HsxDWpmI4BMlJS0NbBGN9lStd4AulPArZ5x3zUqCpAajAfCCyDMzhsGrTWu6+5KNgtzhYNEOagJAvP8KiuckpZPlLSBlRyXzP2t+39Yc6t7S2tCOWgAKx3QIrCvG4BWc1TT5VktgNYKcrN5ZYxByQiQRmg/mwaQBcigz5XVgBpY0xkwEAqFAHBdt2bFp3ReSkk4HC6+T6XTmZUnYsce+iXxXXF94gaNgXvXyaUK/Z1Z5PbCHJlMhmg0yuLiIrlcruI9tRJIy7KwbRulFKlUykxNTTlqenLm83OvvPH2wmezXJ+84Weu9Hy6w1YnBHz6xWXaWuOcOH4C27Z3pUtyXZfx8XESicTcwMBAQnR3d7d3dHQMH2lvf/TW7C2yufQG/+2shRU4Tp7llWVOPf8yLc0thMPhmkJqrZmfnyeZTOZHRkY+HBoa+kAA9PT0HLVt+2IsFjsbCoUaavHy3GqOTDZNtCGKpVTNIAUCY4xeWFj4dXp6+qPh4eFBQP8HkVcmqgq4DdIAAAAASUVORK5CYII='
@@ -70,7 +72,7 @@ def load_settings(settings_file, default_settings):
 
     Returns:
         dict: settings read from settings.cfg or created using default_settings
-    """    
+    """
     try:
         with open(settings_file, 'r', encoding='UTF-8') as f:
             settings = jsonload(f)
@@ -89,7 +91,7 @@ def save_settings(settings_file, settings, values):
         settings_file (str): path to settings file
         settings (dict): settings in memory
         values (dict): contains currently selected or entered values in GUI window
-    """    
+    """
     if values:      # if there are stuff specified by another window, fill in those values
         for key in SETTINGS_KEYS_TO_ELEMENT_KEYS:  # update window with values read from settings
             try:
@@ -103,8 +105,6 @@ def save_settings(settings_file, settings, values):
     sg.popup('Settings saved')
 
 #Google Drive
-data_json = {}
-
 def get_json(apikey, gdriveid, ps=200, pageToken=None):
     """Loads JSON file from Google Drive
 
@@ -116,7 +116,7 @@ def get_json(apikey, gdriveid, ps=200, pageToken=None):
 
     Returns:
         dict: dictionary containing info on each subfolder
-    """    
+    """
     url = f"https://www.googleapis.com/drive/v3/files?q='{gdriveid}'+in+parents&key={apikey}"
     if pageToken:
         url = f"{url}&pageToken={pageToken}"
@@ -157,7 +157,7 @@ def get_video(m, mp3path, mp4path, tpath, ytid):
         mp4path (str): path to store temp mp4
         tpath (str): temp path used by downloader module
         ytid (str): 11 character Youtube ID for video to download
-    """    
+    """
     mpath = os.path.dirname(os.path.abspath(m.locations[0]))
     fpath = os.path.join(mpath, 'theme.mp3')
     url = f'https://www.youtube.com/watch?v={ytid}'
@@ -178,16 +178,16 @@ def list_videos(m):
 
     Returns:
         list: contains title and YouTube video id for each of up to 20 results
-    """    
+    """
     r = VideosSearch(f'"{m.title}" "{m.year}" "Movie" Soundtrack Theme Song', limit=20)
     return [{'title': i.get('title'), 'id': i.get('id')} for i in r.resultComponents]
-    
+
 def clear_youtube_list(window):
     """Empties the current Youtube List window and disabled associated buttons
 
     Args:
         window (PySimpleGui object): the primary GUI window
-    """    
+    """
     window["-YTID CUSTOM-"].update("")
     for i in range(10):
         yttxt = f"-YT TITLE {i}-"
@@ -208,7 +208,7 @@ def check_gd(m, gdmovies):
         (tuple): a tuple containing:
             (dict): dictionary representing the matching movie from the Google Drive (if found)
             (bool): boolean representing success or failure of match
-    """    
+    """
     s = SIFT4()
     regstr = '^(.*\s\(\d\d\d\d\))'
     regstr2 = '^(.*)(?<!\(\d\d\d\d\))$'
@@ -225,16 +225,16 @@ def check_gd(m, gdmovies):
             return i, True
     return None, False
 
-def gd_download(i, m, APIKEY):
+def gd_download(i, m, apikey):
     """Downloads theme from Google Drive to associated movie folder (Plex)
 
     Args:
         i (dict): dictionary representing the movie from the Google Drive
         m (plexapi.video): movie object from Plex
         APIKEY (str): constant containing the Google api key used to interact with Google Drive
-    """    
+    """
     file_id = i.get('id')
-    url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media&key={APIKEY}"
+    url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media&key={apikey}"
     req = Request(url)
     req.add_header('User-agent', 'Mozilla/5.0')
     mpath = os.path.dirname(os.path.abspath(m.locations[0]))
@@ -242,58 +242,60 @@ def gd_download(i, m, APIKEY):
     with open(fpath, 'wb') as f:
         f.write(urlopen(req).read())
 
-def get_all(window, gdmovies, APIKEY):
+def get_all(window, apikey):
     global filterlist
+    global gdmovies
     progress_bar = start_progress(window)
     for count, m in enumerate(filterlist, start=1):
         update_progress(progress_bar, count, filterlist)
         i, found = check_gd(m, gdmovies)
-        if found == True:
-            gd_download(i, m, APIKEY)
+        if found is True:
+            gd_download(i, m, apikey)
     progress_bar.update(visible=False)
 
-def load_gdrive(window, update, APIKEY, GDRIVEID):
-    if not exists("gdrive.pkl") or update:
-        return update_from_gdrive(window, APIKEY, GDRIVEID)
-    with open("gdrive.pkl", "rb") as file:
+def load_gdrive(window, update, apikey, gdriveid):
+    global gdmovies
+    pkl = os.path.join(os.getcwd(), 'gdrive.pkl')
+    if not exists(pkl) or update:
+        return update_from_gdrive(window, apikey, gdriveid, pkl)
+    with open(pkl, "rb") as file:
         unpickler = pickle.Unpickler(file)
-        return unpickler.load()
+        gdmovies = unpickler.load()
 
-def update_from_gdrive(window, APIKEY, GDRIVEID):
+def update_from_gdrive(window, apikey, gdriveid, pkl):
     global gdmovies
     print('Gathering movie list from Google Drive...')
     gdfolders = []
     gdmovies = []
-    data_json = get_json(APIKEY, GDRIVEID)
-    gdfolders = dict_to_list(gdfolders, data_json)
+    dj = get_json(apikey, gdriveid)
+    gdfolders = dict_to_list(gdfolders, dj)
     progress_bar = window['-PROGRESS2-']
     window['-PROGRESST-'].update("This will take a few minutes:", visible=True)
     progress_bar.update(visible=True)
     window.refresh()
 
-    while "nextPageToken" in data_json:
-        pageToken=data_json.get('nextPageToken')
-        data_json = get_json(APIKEY, GDRIVEID, 200, pageToken)
-        gdfolders = dict_to_list(gdfolders, data_json)
+    while "nextPageToken" in dj:
+        pageToken=dj.get('nextPageToken')
+        dj = get_json(apikey, gdriveid, 200, pageToken)
+        gdfolders = dict_to_list(gdfolders, dj)
     for count, f in enumerate(gdfolders, start=1):
         gdfiles = []
         percent_calc = round(count / len(gdfolders) * 100)
         progress_bar.update_bar(percent_calc)
         progress_bar.update()
-        data_json = get_json(APIKEY, f.get('id'))
-        gdfiles.extend(iter(data_json.get('files')))
+        dj = get_json(apikey, f.get('id'))
+        gdfiles.extend(iter(dj.get('files')))
         for gdf in gdfiles:
             if gdf.get('name') == "theme.mp3":
                 mp3 = {'name': f.get('name'), 'id': gdf.get('id')}
                 gdmovies.append(mp3)
     window['-PROGRESST-'].update(visible=False)
     progress_bar.update(visible=False)
-    with open("gdrive.pkl", "wb") as file:
+    with open(pkl, "wb") as file:
         pickle.dump(gdmovies, file)
-    return gdmovies
 
 #Create connection to Plex Server
-def connect_plex(PLEX_URL, PLEX_TOKEN):
+def connect_plex(url, token):
     print('Connecting to Plex')
     sess = requests.Session()
     # Ignore verifying the SSL certificate
@@ -302,24 +304,29 @@ def connect_plex(PLEX_URL, PLEX_TOKEN):
         # Disable the warning that the request is insecure, we know that...
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    return PlexServer(PLEX_URL, PLEX_TOKEN, session=sess), True
+    return PlexServer(url, token, session=sess), True
     #End Create connection to Plex Server
 
-def start_progress(window):
-    progress_bar = window['-PROGRESS-']
+def start_progress(window, bar='-PROGRESS-'):
+    progress_bar = window[bar]
     progress_bar.update(visible=True)
     window.refresh()
     return progress_bar
 
-def update_progress(pbar, count, list):
-    percent_calc = round(count / len(list) * 100)
+def update_progress(pbar, count, l):
+    percent_calc = round(count / len(l) * 100)
     pbar.update_bar(percent_calc)
     pbar.update()
 
-def load_plex_movies(LIBRARY, window, plex):
+def load_plex_movies(lib, window, plex):
     global plexmovies
+    global filterlist
+    plexmovies = []
+    filterlist = []
+    filterpkl = []
     progress_bar = start_progress(window)
-    librarylist = plex.library.section(LIBRARY).all()
+    librarylist = plex.library.section(lib).all()
+    pkl = os.path.join(os.getcwd(), 'filterlist.pkl')
     for count, m in enumerate(librarylist, start=1):
         update_progress(progress_bar, count, librarylist)
         found = False
@@ -334,17 +341,36 @@ def load_plex_movies(LIBRARY, window, plex):
     progress_bar.update(visible=False)
     window["-MOVIE LIST-"].update(plexmovies)
     window["-FILTER-"].update(image_data=off_image)
+    if exists(pkl):
+        with open(pkl, "rb") as file:
+            unpickler = pickle.Unpickler(file)
+            filterpkl = unpickler.load()
+            for m in librarylist:
+                if m.key in filterpkl:
+                    filterlist.append(m)
 
-def filter_plex(window, gdmovies):
+
+def filter_plex(window):
+    global gdmovies
+    global plexmovies
     global filterlist
     global filterstate
-    progress_bar = start_progress(window)
+    pkl = os.path.join(os.getcwd(), 'filterlist.pkl')
+    filterlist = []
+    filterpkl = []
+    filterstate = False
+    progress_bar = start_progress(window, '-PROGRESS2-')
+    window['-PROGRESST-'].update("This will take a few minutes:", visible=True)
     for count, i in enumerate(plexmovies, start=1):
         update_progress(progress_bar, count, plexmovies)
         _, found = check_gd(i, gdmovies)
-        if found == True:
+        if found is True:
             filterlist.append(i)
+            filterpkl.append(i.key)
     progress_bar.update(visible=False)
+    window['-PROGRESST-'].update(visible=False)
+    with open(pkl, "wb") as file:
+        pickle.dump(filterpkl, file)
     window['-MOVIE LIST-'].update(filterlist)
     window['-FILTER-'].update(image_data=on_image)
     filterstate=True
@@ -352,22 +378,25 @@ def filter_plex(window, gdmovies):
 
 def filter_switch(window):
     global filterstate
-    if filterstate == True:
-        filter_flip(window, off_image, plexmovies, False)
+    global filterlist
+    global plexmovies
+    if filterstate is True:
+        filterstate = filter_flip(window, off_image, plexmovies, False)
     else:
-        filter_flip(window, on_image, filterlist, True)
+        filterstate = filter_flip(window, on_image, filterlist, True)
+    return filterstate
 
 
 def filter_flip(window, image_data, arg2, arg3):
-    global filterstate
     window['-FILTER-'].update(image_data=image_data)
     window['-MOVIE LIST-'].update(arg2)
-    filterstate = arg3
-    window['-GET ALL-'].update(disabled=not arg3)
+    fs = arg3
+    window['-GET ALL-'].update(disabled=not fs)
+    return fs
 
 def get_poster(values):
     m_selected = values['-MOVIE LIST-'][0]
-    poster = Image.open(requests.get(m_selected.posterUrl, stream = True).raw)
+    poster = Image.open(requests.get(m_selected.posterUrl, stream = True, timeout=3).raw)
     pfile = os.path.join(tempfile.mkdtemp(), 'poster.png')
     poster.resize((200,300)).save(pfile, "PNG")
     return m_selected, pfile
@@ -424,6 +453,8 @@ def create_main_window(settings):
         [
             sg.Text("Update Google Drive List"),
             sg.Button("Update", enable_events=True, k='-LOAD GDRIVE-'),
+            sg.Text("Update Filter List"),
+            sg.Button("Update", enable_events=True, k='-LOAD FILTERLIST-'),
             sg.pin(sg.Text("", k="-PROGRESST-", visible=False)),
             sg.pin(sg.ProgressBar(100, orientation='h', size=(27, 22), k="-PROGRESS2-", visible=False)),
             sg.Push(),
@@ -630,21 +661,32 @@ def create_main_window(settings):
             sg.Column(output_data, k="-SEARCHCOL-", expand_y=True, vertical_alignment='t')
         ]
     ]
-    return sg.Window('Plex Theme Songs', layout, resizable=True, icon="ThemeSong.ico"), PLEX_URL, PLEX_TOKEN, LIBRARY, gdmovies, tpath, mp3path, mp4path, APIKEY, GDRIVEID
+    return sg.Window('Plex Theme Songs', layout, resizable=True, icon="ThemeSong.ico"), PLEX_URL, PLEX_TOKEN, LIBRARY, tpath, mp3path, mp4path, APIKEY, GDRIVEID
 
 def main():  # sourcery skip: extract-duplicate-method, low-code-quality
     window, settings = None, load_settings(SETTINGS_FILE, DEFAULT_SETTINGS)
     plex_connected = False
+    global plexmovies
+    global gdmovies
+    global filterlist
+    global filterstate
+    plexmovies = []
+    gdmovies = []
+    filterlist = []
+    filterstate = False
     while True:
         if window is None:
-            window, PLEX_URL, PLEX_TOKEN, LIBRARY, gdmovies, tpath, mp3path, mp4path, APIKEY, GDRIVEID = create_main_window(settings)
+            window, PLEX_URL, PLEX_TOKEN, LIBRARY, tpath, mp3path, mp4path, APIKEY, GDRIVEID = create_main_window(settings)
 
-        event, values = window.read(timeout=500)
+        event, values = window.read()
         if not plex_connected:
-            plex, plex_connected = connect_plex(PLEX_URL, PLEX_TOKEN)
-        if gdmovies == [] or event == "-LOAD GDRIVE-":
+            if PLEX_TOKEN is not None:
+                plex, plex_connected = connect_plex(PLEX_URL, PLEX_TOKEN)
+            else:
+                window.write_event_value('-SETTINGS-', None)
+        if (not gdmovies) or (event == "-LOAD GDRIVE-"):
             update = event == "-LOAD GDRIVE-"
-            gdmovies = load_gdrive(window, update, APIKEY, GDRIVEID)
+            load_gdrive(window, update, APIKEY, GDRIVEID)
         if event in ["Exit", sg.WIN_CLOSED]:
             break
         elif event == "-SETTINGS-":
@@ -653,24 +695,20 @@ def main():  # sourcery skip: extract-duplicate-method, low-code-quality
                 window.close()
                 window = None
                 save_settings(SETTINGS_FILE, settings, values)
-
+        elif event == "-LOAD FILTERLIST-":
+            if not plexmovies:
+                load_plex_movies(LIBRARY, window, plex)
+            window["-FILTER-"].update(image_data=on_image_disabled)
+            filter_plex(window)
         elif event == "-LOAD PLEX-":
             window["-LOAD PLEX-"].update(disabled=True)
-            threading.Thread(target=load_plex_movies, args=(LIBRARY, window, plex), daemon=True).start()
+            load_plex_movies(LIBRARY, window, plex)
         elif event == 'End':
             window["-LOAD PLEX-"].update(disabled=False)
         elif event == '-FILTER-':
-            if plexmovies == []:
-                sg.popup_auto_close('You must first load your movie library from Plex before being able to filter.', title="No Movies to Filter")
-            elif filterlist == []:
-                window["-FILTER-"].update(image_data=on_image_disabled)
-                threading.Thread(target=filter_plex, args=(window, gdmovies), daemon=True).start()
-            else:
-                filter_switch(window)
+            filter_switch(window)
         elif event == '-GET ALL-':
-            #window['-GET ALL-'].update(disabled=True)
-            get_all(window, gdmovies, APIKEY)
-            #threading.Thread(target=get_all, args=(window, gdmovies), daemon=True).start()
+            get_all(window, gdmovies, APIKEY, filterlist)
         elif event == "-MOVIE LIST-" and len(values['-MOVIE LIST-']):
             clear_youtube_list(window)
             window["-YOUTUBE BUTTON-"].update(disabled=False)
@@ -681,7 +719,7 @@ def main():  # sourcery skip: extract-duplicate-method, low-code-quality
                 window["-GD BUTTON-"].update(disabled=False)
             else:
                 window["-GD-"].update("Theme not found on Google Drive.")
-                window["-GD BUTTON-"].update(disabled=True) 
+                window["-GD BUTTON-"].update(disabled=True)
             title = f"{movie.title} ({movie.year})"
             fontsize = adjust_font_size(title)
             genres = get_data_list(movie, 'genres', 10)
@@ -714,7 +752,7 @@ def main():  # sourcery skip: extract-duplicate-method, low-code-quality
         elif event == "PAGE2":
             clear_youtube_list(window)
             loop = 2
-            gen_vids_list(window, splits, loop)            
+            gen_vids_list(window, splits, loop)
         elif event == "PAGE1":
             clear_youtube_list(window)
             loop = 1
