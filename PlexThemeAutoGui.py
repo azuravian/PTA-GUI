@@ -194,7 +194,7 @@ def clear_youtube_list(window):
         window[ytview].update(disabled=True)
         window[ytget].update(disabled=True)
 
-def check_gd(m, gdmovies):
+def check_gd(m, gdm):
     """Checks to see if theme already exists in Google Drive
 
     Args:
@@ -209,7 +209,7 @@ def check_gd(m, gdmovies):
     s = SIFT4()
     regstr = '^(.*\s\(\d\d\d\d\))'
     regstr2 = '^(.*)(?<!\(\d\d\d\d\))$'
-    for i in gdmovies:
+    for i in gdm:
         gdtitle = i.get('name')
         if match := re.findall(regstr, gdtitle):
             title = f'{m.title} ({m.year})'
@@ -319,7 +319,6 @@ def load_plex_movies(lib, window, plex):
     global plexmovies
     global filterlist
     plexmovies = []
-    filterlist = []
     filterpkl = []
     progress_bar = start_progress(window)
     librarylist = plex.library.section(lib).all()
@@ -339,12 +338,11 @@ def load_plex_movies(lib, window, plex):
     window["-MOVIE LIST-"].update(plexmovies)
     window["-FILTER-"].update(image_data=off_image)
     if exists(pkl):
+        filterlist = []
         with open(pkl, "rb") as file:
             unpickler = pickle.Unpickler(file)
             filterpkl = unpickler.load()
-            for m in librarylist:
-                if m.key in filterpkl:
-                    filterlist.append(m)
+            filterlist.extend(m for m in librarylist if m.key in filterpkl)
 
 
 def filter_plex(window):
@@ -705,7 +703,7 @@ def main():  # sourcery skip: extract-duplicate-method, low-code-quality
         elif event == '-FILTER-':
             filter_switch(window)
         elif event == '-GET ALL-':
-            get_all(window, gdmovies, APIKEY, filterlist)
+            get_all(window, APIKEY)
         elif event == "-MOVIE LIST-" and len(values['-MOVIE LIST-']):
             clear_youtube_list(window)
             window["-YOUTUBE BUTTON-"].update(disabled=False)
@@ -784,7 +782,6 @@ def get_data_list(movie, t, n):
 
 
 def divide_chunks(l, n):
-     
     # looping till length l
     for i in range(0, len(l), n):
         yield l[i:i + n]
