@@ -22,8 +22,6 @@ from pytube import YouTube
 from strsimpy import SIFT4
 from youtubesearchpython import VideosSearch
 
-print(os.getcwd())
-
 FOLDER = 'application/vnd.google-apps.folder'
 #GDRIVEID = ""
 plexmovies = []

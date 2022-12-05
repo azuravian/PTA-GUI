@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+moviepy = "*"
+plexapi = "*"
+pytube = "*"
+strsimpy = "*"
+youtube-search-python = "*"
+lorem = "*"
+pysimplegui = "*"
+urllib3 = "*"
+pillow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
